@@ -20,7 +20,6 @@ label = LabelEncoder()
 df['Extracurricular Activities'] = label.fit_transform(df['Extracurricular Activities'])
 # create 'final outcome' column based on 'Previous Scores' column. A score of 50 or above is considered a 1 (Pass) and below 50 is considered a 0 (Fail)
 df['Final Outcome'] = np.where(df['Previous Scores'] >= 50, 1, 0)
-print(df[['Previous Scores', 'Final Outcome']].head(20))
 
 
 # define features and target variable
@@ -48,20 +47,9 @@ model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy']
 # train model
 model.fit(X_train, y_train, epochs=200, batch_size=64, validation_split=0.2)
 
-# evaluate model
-loss, accuracy = model.evaluate(X_test, y_test)
-print('Accuracy: %.2f' % (accuracy*100))
-
 # make predictions
 y_pred = model.predict(X_test)
 y_pred = (y_pred > 0.5).astype(int)
-
-# model evaluation
-accuracy = accuracy_score(y_test, y_pred)
-precision = precision_score(y_test, y_pred)
-recall = recall_score(y_test, y_pred)
-f1 = f1_score(y_test, y_pred)
-roc_auc = roc_auc_score(y_test, y_pred)
 
 # Risk Score and Classification
 def categorize_risk(probability):
