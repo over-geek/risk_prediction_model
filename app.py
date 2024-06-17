@@ -112,7 +112,7 @@ def calc_required_score(cum_weighted_marks, target_cwa, total_credit_hours_obtai
   return required_score
 
 
-@app.route('/predict', methods=['POST'])
+@app.route('/predict', methods=['GET', 'POST'])
 def predict():
     data = request.get_json()
     hours_studied = data['hours_studied']
@@ -131,7 +131,7 @@ def predict():
         'recommendations': recommendations
     })
 
-@app.route('/required_score', methods=['POST'])
+@app.route('/required_score', methods=['GET', 'POST'])
 def required_score():
     data = request.get_json()
     cum_weighted_marks = data['cum_weighted_marks']
