@@ -17,8 +17,6 @@ label = LabelEncoder()
 df['Extracurricular Activities'] = label.fit_transform(df['Extracurricular Activities'])
 # create 'final outcome' column based on 'Previous Scores' column. A score of 50 or above is considered a 1 (Pass) and below 50 is considered a 0 (Fail)
 df['Final Outcome'] = np.where(df['Previous Scores'] >= 50, 1, 0)
-print(df[['Previous Scores', 'Final Outcome']].head(20))
-
 
 # define features and target variable
 X = df[['Hours Studied', 'Previous Scores', 'Extracurricular Activities', 'Sleep Hours', 'Sample Question Papers Practiced']]
