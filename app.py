@@ -60,29 +60,58 @@ df['Risk Score'] = model.predict_proba(scaler.transform(X))[:, 1]
 df['Risk Category'] = df['Risk Score'].apply(lambda x: categorize_risk(x))
 
 # Provide recommendations based on the risk category
-def provide_recommendations(risk_category):
-    recommendations = {
-        'Low Risk': [
-            'Continue your current study routine.',
-            'Explore additional extracurricular activities to enhance your skills.'
-        ],
-        'Moderate Risk': [
-            'Increase your study hours by 2 hours per week.',
-            'Practice more sample question papers to improve your problem-solving skills.'
-        ],
-        'High Risk': [
-            'Increase study hours and practice more sample question papers.'
-            'Seek help from teachers and peers to improve understanding of the subjects.',
-            'Participate in study groups',
-            'Get more sleep and maintain a healthy lifestyle.'
-        ]
-    }
+def provide_recommendations(risk_category, hours_studied, extracurricular_activities, sleep_hours, sample_question_papers_practiced):
+    recommendations = []
 
-    selected_recommendations = recommendations[risk_category]
-    return selected_recommendations
-    
+    if risk_category == 'Low Risk':
+        recommendations.append('Continue your current study routine.')
+        if extracurricular_activities < 5:
+            recommendations.append('Explore additional extracurricular activities to enhance your skills.')
+        if sleep_hours < 7:
+            recommendations.append('Try to get at least 7 hours of sleep each night to maintain a healthy lifestyle.')
 
-df['Recommendations'] = df['Risk Category'].apply(provide_recommendations)
+    elif risk_category == 'Moderate Risk':
+        if hours_studied < 20:
+            recommendations.append('Increase your study hours by 2 hours per week.')
+        if sample_question_papers_practiced < 5:
+            recommendations.append('Practice more sample question papers to improve your problem-solving skills.')
+        if sleep_hours < 7:
+            recommendations.append('Ensure you are getting enough sleep (at least 7 hours).')
+        if extracurricular_activities < 3:
+            recommendations.append('Consider balancing your study with some extracurricular activities for overall development.')
+
+    elif risk_category == 'High Risk':
+        if hours_studied < 25:
+            recommendations.append('Significantly increase your study hours.')
+        if sample_question_papers_practiced < 7:
+            recommendations.append('Practice more sample question papers.')
+        if sleep_hours < 7:
+            recommendations.append('Ensure you get more sleep (at least 7-8 hours) to help with retention and focus.')
+        recommendations.append('Seek help from teachers and peers to improve understanding of the subjects.')
+        recommendations.append('Participate in study groups.')
+        if extracurricular_activities < 2:
+            recommendations.append('Consider adding some extracurricular activities to reduce stress.')
+
+    return recommendations
+
+def risk_description(risk_category):
+    if risk_category == 'Low Risk':
+        return 'You are currently performing well in your studies and have a low risk of academic failure. Your study habits, engagement in extracurricular activities, sleep patterns, and practice with sample question papers are contributing positively to your academic success.'
+    elif risk_category == 'Moderate Risk':
+        return 'You are on the verge of meeting your academic goals, but need to take extra steps to ensure you do not fall behind. With a few adjustments to your study habits and practice, you can overcome this moderate risk and achieve your desired outcomes.'
+    else:
+        return 'You are at a high risk of academic failure. Significant improvements are needed in your study habits, sleep patterns, and engagement in extracurricular activities to enhance your academic performance.'
+
+
+df['Recommendations'] = df.apply(
+    lambda row: provide_recommendations(
+        row['Risk Category'],
+        row['Hours Studied'],
+        row['Extracurricular Activities'],
+        row['Sleep Hours'],
+        row['Sample Question Papers Practiced']
+    ), axis=1
+)
 
 def calc_required_score(cum_weighted_marks, target_cwa, total_credit_hours_obtained, current_semester_credit_hours):
   total_credit_hours = total_credit_hours_obtained + current_semester_credit_hours
@@ -101,11 +130,13 @@ def predict():
 
     probability = model.predict_proba(scaler.transform([[hours_studied, previous_scores, extracurricular_activities, sleep_hours, sample_question_papers_practiced]]))[0][1]
     risk_category = categorize_risk(probability)
-    recommendations = provide_recommendations(risk_category)
+    risk_info = risk_description(risk_category)
+    recommendations = provide_recommendations(risk_category, hours_studied, extracurricular_activities, sleep_hours, sample_question_papers_practiced)
 
     response = {
         'risk_score': probability,
         'risk_category': risk_category,
+        'risk_info': risk_info,
         'recommendations': recommendations
     }
 
